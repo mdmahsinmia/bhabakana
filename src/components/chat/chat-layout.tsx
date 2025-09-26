@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Sidebar,
@@ -8,13 +8,13 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
-import { useChat } from '@/hooks/use-chat';
-import { ChatHistory } from './chat-history';
-import { ChatPanel } from './chat-panel';
-import { ThemeToggle } from '../theme-toggle';
-import { Bot, Plus } from 'lucide-react';
+} from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { useChat } from "@/hooks/use-chat";
+import { ChatHistory } from "./chat-history";
+import { ChatPanel } from "./chat-panel";
+import { ThemeToggle } from "../theme-toggle";
+import { Bot, Plus } from "lucide-react";
 
 export function ChatLayout() {
   const { createNewConversation } = useChat();
@@ -22,15 +22,12 @@ export function ChatLayout() {
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full">
-        <Sidebar className="w-full md:w-[260px]" collapsible="icon">
+        <Sidebar className="w-full md:w-[260px]" collapsible="offcanvas">
           <SidebarHeader>
             <div className="flex w-full items-center justify-between p-2">
               <div className="flex items-center gap-2">
                 <Bot className="h-6 w-6 text-primary" />
                 <h1 className="font-headline text-lg font-semibold">ভাবকণা</h1>
-              </div>
-              <div>
-                 <SidebarTrigger />
               </div>
             </div>
           </SidebarHeader>
@@ -55,7 +52,7 @@ export function ChatLayout() {
         <SidebarInset className="flex flex-col">
           <div className="flex h-full flex-col">
             <header className="flex h-14 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur-sm md:px-6">
-              <div className="md:hidden">
+              <div>
                 <SidebarTrigger />
               </div>
               <div className="flex-1">
