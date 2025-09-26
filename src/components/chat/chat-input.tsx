@@ -40,7 +40,7 @@ export function ChatInput() {
         value={input}
         onChange={e => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Type a message..."
+        placeholder="একটি বার্তা টাইপ করুন..."
         className="max-h-48 min-h-[40px] resize-none pr-12"
         disabled={isLoading}
       />

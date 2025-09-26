@@ -38,7 +38,7 @@ export function ChatLayout() {
               onClick={createNewConversation}
             >
               <Plus className="mr-2 h-4 w-4" />
-              New Chat
+              নতুন চ্যাট
             </Button>
             <ChatHistory />
           </SidebarContent>

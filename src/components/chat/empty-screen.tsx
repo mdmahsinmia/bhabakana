@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useChat } from '@/hooks/use-chat';
-import { Bot } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useChat } from "@/hooks/use-chat";
+import { Bot } from "lucide-react";
 
 const examplePrompts = [
-  'What is the meaning of life?',
-  'Explain quantum computing in simple terms.',
-  'Write a short story about a robot who discovers music.',
-  'How do I make a perfect omelette?',
+  "জীবনের অর্থ কী?",
+  "কোয়ান্টাম কম্পিউটিং সহজ ভাষায় ব্যাখ্যা করুন।",
+  "সঙ্গীত আবিষ্কারকারী একজন রোবট সম্পর্কে একটি ছোট গল্প লিখুন।",
+  "আমি কীভাবে একটি নিখুঁত অমলেট তৈরি করব?",
 ];
 
 export function EmptyScreen() {
@@ -23,7 +23,7 @@ export function EmptyScreen() {
             <Bot className="h-10 w-10 text-primary" />
           </div>
           <h1 className="text-center font-headline text-3xl font-semibold">
-            How can I help you today?
+            ভাবকনায় স্বাগতম!
           </h1>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

@@ -38,39 +38,43 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
-    --background: 197 37% 24%;
-    --foreground: 0 0% 95%;
-    --card: 197 37% 29%;
-    --card-foreground: 0 0% 95%;
-    --popover: 197 37% 24%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 188 30% 41%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 197 37% 34%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 197 37% 34%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 125 29% 51%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 62.8% 30.6%;
+    /* ChatGPT-style dark theme colors in HSL */
+    --background: 230 10% 12%; /* A very dark, slightly bluish gray */
+    --foreground: 220 20% 95%; /* A soft, off-white for text */
+    --card: 230 10% 18%; /* Darker than background for card surfaces */
+    --card-foreground: 220 20% 95%;
+    --popover: 230 10% 12%;
+    --popover-foreground: 220 20% 95%;
+    --primary: 220 20% 95%; /* Text color can be used for primary elements */
+    --primary-foreground: 230 10% 12%; /* The main dark background color */
+    --secondary: 230 10% 22%; /* A slightly lighter dark gray for secondary elements */
+    --secondary-foreground: 220 20% 95%;
+    --muted: 230 10% 25%; /* Slightly lighter still for muted content */
+    --muted-foreground: 220 10% 65%; /* Muted gray for text */
+    --accent: 164 24% 56%; /* The distinct ChatGPT green (#74aa9c) converted to HSL */
+    --accent-foreground: 230 10% 12%;
+    --destructive: 0 65% 55%; /* A reddish color for destructive actions */
     --destructive-foreground: 0 0% 98%;
-    --border: 197 37% 34%;
-    --input: 197 37% 34%;
-    --ring: 125 29% 51%;
+    --border: 230 10% 25%;
+    --input: 230 10% 22%;
+    --ring: 164 24% 56%;
+    /* Keep chart colors as they are for distinction */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 197 37% 22%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 125 29% 51%;
-    --sidebar-primary-foreground: 0 0% 9%;
-    --sidebar-accent: 197 37% 29%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 197 37% 29%;
-    --sidebar-ring: 125 29% 51%;
+    --radius: 0.5rem;
+    --sidebar-background: 230 10% 15%; /* A slightly lighter shade for the sidebar */
+    --sidebar-foreground: 220 20% 95%;
+    --sidebar-primary: 164 24% 56%; /* The accent green for primary sidebar elements */
+    --sidebar-primary-foreground: 230 10% 12%;
+    --sidebar-accent: 230 10% 22%;
+    --sidebar-accent-foreground: 220 20% 95%;
+    --sidebar-border: 230 10% 25%;
+    --sidebar-ring: 164 24% 56%;
   }
 }
 
