@@ -1,1 +1,5 @@
-// Flows will be imported for their side effects in this file.
+import { config } from 'dotenv';
+config();
+
+import '@/ai/flows/generate-response-from-conversation.ts';
+import '@/ai/flows/copy-to-clipboard-with-summary.ts';
