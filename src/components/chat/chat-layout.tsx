@@ -22,12 +22,15 @@ export function ChatLayout() {
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full">
-        <Sidebar className="w-full md:w-[260px] lg:w-[300px]" collapsible="icon">
+        <Sidebar className="w-full md:w-[260px]" collapsible="icon">
           <SidebarHeader>
             <div className="flex w-full items-center justify-between p-2">
               <div className="flex items-center gap-2">
                 <Bot className="h-6 w-6 text-primary" />
-                <h1 className="font-headline text-lg font-semibold">NextChat</h1>
+                <h1 className="font-headline text-lg font-semibold">ভাবকণা</h1>
+              </div>
+              <div>
+                 <SidebarTrigger />
               </div>
             </div>
           </SidebarHeader>

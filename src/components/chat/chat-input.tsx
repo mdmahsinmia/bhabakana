@@ -47,7 +47,7 @@ export function ChatInput() {
       <Button
         type="submit"
         size="icon"
-        className="absolute bottom-2 right-2 shrink-0"
+        className="absolute bottom-0 right-0 shrink-0 cursor-pointer"
         disabled={isLoading || !input.trim()}
       >
         <Send className="h-5 w-5" />
