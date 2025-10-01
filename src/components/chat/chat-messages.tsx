@@ -16,8 +16,8 @@ export function ChatMessages() {
   }, [currentConversation?.messages, isLoading]);
 
   return (
-    <div ref={scrollAreaRef} className="h-full overflow-y-auto">
-      <div className="mx-auto w-full max-w-2xl space-y-6 p-4 md:p-6">
+    <div ref={scrollAreaRef} className="h-full overflow-y-auto smooth-transition">
+      <div className="mx-auto w-full max-w-2xl space-y-6 p-4 md:p-6 glass glass-dark">
         {currentConversation?.messages.map(message => (
           <Message key={message.id} message={message} />
         ))}

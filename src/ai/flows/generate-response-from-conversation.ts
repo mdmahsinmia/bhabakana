@@ -9,6 +9,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { analyzeBanglaSentiment } from '@/services/nlp/bangla-sentiment';
 
 const GenerateResponseFromConversationInputSchema = z.object({
   conversationHistory: z
@@ -37,19 +38,8 @@ export async function generateResponseFromConversation(
   return generateResponseFromConversationFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'generateResponseFromConversationPrompt',
-  input: {schema: GenerateResponseFromConversationInputSchema},
-  output: {schema: GenerateResponseFromConversationOutputSchema},
-  prompt: `You are a helpful assistant. Generate a response based on the following conversation history:
-
-  {{#each conversationHistory}}
-  {{#if (eq role \"user\")}}User: {{content}}{{/if}}
-  {{#if (eq role \"assistant\")}}Assistant: {{content}}{{/if}}
-  {{/each}}
-
-  Assistant: `,
-});
+// Remove the prompt definition
+// const prompt = ai.definePrompt({...});
 
 const generateResponseFromConversationFlow = ai.defineFlow(
   {
@@ -57,8 +47,36 @@ const generateResponseFromConversationFlow = ai.defineFlow(
     inputSchema: GenerateResponseFromConversationInputSchema,
     outputSchema: GenerateResponseFromConversationOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  async (input) => {
+    // Manually format the conversation history
+    // Get the latest user message for sentiment analysis
+    const latestUserMessage = input.conversationHistory
+      .filter(msg => msg.role === 'user')
+      .pop()?.content || '';
+
+    const sentiment = analyzeBanglaSentiment(latestUserMessage);
+    let sentimentContext = '';
+    if (sentiment.sentiment === 'positive') {
+      sentimentContext = 'The user seems positive and enthusiastic. Respond in a warm, engaging manner.';
+    } else if (sentiment.sentiment === 'negative') {
+      sentimentContext = 'The user seems concerned or negative. Respond empathetically and helpfully.';
+    } else {
+      sentimentContext = 'The user is neutral. Provide a standard helpful response.';
+    }
+
+    const formattedHistory = input.conversationHistory.map(msg =>
+      ` ${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
+    ).join('\n');
+
+    const promptText = `You are a helpful assistant. ${sentimentContext} Generate a response based on the following conversation history:\n\n${formattedHistory}\n\nAssistant: `;
+
+    const result = await ai.generate({
+      model: 'googleai/gemini-2.5-flash',
+      prompt: promptText,
+    }, {
+      outputSchema: GenerateResponseFromConversationOutputSchema,
+    });
+
+    return { response: result.response || result.text };
   }
 );

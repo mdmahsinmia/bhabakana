@@ -4,7 +4,8 @@ import type { ReactNode } from 'react';
 import React, { createContext, useCallback, useMemo } from 'react';
 import type { Conversation, Message } from '@/types';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { generateResponseFromConversation } from '@/ai/flows/generate-response-from-conversation';
+import { analyzeBanglaSentiment } from '@/services/nlp/bangla-sentiment';
+import { banglaPatterns } from '@/services/nlp/bangla-patterns';
 import { useToast } from '@/hooks/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -78,15 +79,51 @@ export function ChatProvider({ children }: ChatProviderProps) {
     });
 
     try {
-      const currentHistory = conversations.find(c => c.id === currentConversationId)?.messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })) || [];
-      const { response } = await generateResponseFromConversation({
-        conversationHistory: [...currentHistory, { role: 'user', content }],
-      });
+      let assistantContent = '';
+
+      // Random delay 1-2 seconds for natural flow before any response generation
+      const delay = Math.random() * 1000 + 1000;
+      await new Promise(resolve => setTimeout(resolve, delay));
+
+      // Check for specific Bangla patterns (exclude fallback)
+      const specificMatch = banglaPatterns.find(rule => rule.type !== 'fallback' && rule.pattern.test(content));
+
+      if (specificMatch) {
+        // Select random response from matching rule
+        assistantContent = specificMatch.responses[Math.floor(Math.random() * specificMatch.responses.length)];
+      } else {
+          // Fall back to local NLP sentiment analysis
+          try {
+            const sentimentResult = await analyzeBanglaSentiment(content);
+            const sentimentResponses = {
+              positive: [
+                'আপনার কথা শুনে খুব ভালো লাগল! আরও কিছু বলুন।',
+                'আপনার ইতিবাচক মনোভাব আমাকে উৎসাহিত করে। ধন্যবাদ!',
+                'চমৎকার! আপনার মতামত আমার কাছে মূল্যবান।'
+              ],
+              negative: [
+                'দুঃখিত যে আপনার এমন অনুভূতি হচ্ছে। আমি সাহায্য করতে চাই।',
+                'আপনার কথা শুনে দুঃখ লাগল। কিভাবে উন্নত করতে পারি?',
+                'আমি আপনার পাশে আছি। আরও বিস্তারিত বলুন।'
+              ],
+              neutral: [
+                'আমি আপনার কথা শুনছি। আরও বিস্তারিত বলুন।',
+                'আপনার বক্তব্য বুঝতে চেষ্টা করছি। কোনো নির্দিষ্ট প্রশ্ন আছে?',
+                'আমি এখানে আছি আপনাকে সাহায্য করার জন্য।'
+              ]
+            };
+            const responses = sentimentResponses[sentimentResult.sentiment] || sentimentResponses.neutral;
+            assistantContent = responses[Math.floor(Math.random() * responses.length)];
+          } catch (error) {
+            console.error('Error in sentiment analysis:', error);
+            assistantContent = 'আমি আপনার কথা শুনছি। আরও বিস্তারিত বলুন।'; // Default neutral response
+          }
+        }
       
       const assistantMessage: Message = {
         id: uuidv4(),
         role: 'assistant',
-        content: response,
+        content: assistantContent,
         createdAt: new Date().toISOString(),
       };
 
@@ -119,57 +156,92 @@ export function ChatProvider({ children }: ChatProviderProps) {
   }, [isLoading, currentConversationId, conversations, setConversations, setCurrentConversationId, toast]);
 
   const regenerateResponse = useCallback(async () => {
-    if (!currentConversation || isLoading) return;
-
-    const userMessages = currentConversation.messages.filter(m => m.role === 'user');
-    const lastUserMessage = userMessages[userMessages.length - 1];
-
-    if (!lastUserMessage) return;
-
-    setIsLoading(true);
-    
-    // Remove last assistant response if it exists
-    setConversations(prev =>
-      prev.map(c =>
+      if (!currentConversation || isLoading) return;
+  
+      setIsLoading(true);
+      
+      // Get updated conversations after removing last assistant response
+      let updatedConversations = conversations.map(c =>
         c.id === currentConversationId
-          ? { ...c, messages: c.messages.filter(m => m.role === 'user' || m.id !== c.messages[c.messages.length - 1].id) }
+          ? { ...c, messages: c.messages.filter(m => m.role === 'user' || (m.role === 'assistant' && c.messages[c.messages.length - 1].id !== m.id)) }
           : c
-      )
-    );
-
-    try {
-        const historyWithoutLastResponse = currentConversation.messages.filter(m => m.role === 'user');
-        const conversationHistoryForAI = historyWithoutLastResponse.map(m => ({ role: m.role, content: m.content }));
-        
-        const { response } = await generateResponseFromConversation({
-            conversationHistory: conversationHistoryForAI,
-        });
-
-      const assistantMessage: Message = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: response,
-        createdAt: new Date().toISOString(),
-      };
-
-      setConversations(prev =>
-        prev.map(c =>
-          c.id === currentConversationId
-            ? { ...c, messages: [...historyWithoutLastResponse, assistantMessage] }
-            : c
-        )
       );
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: 'Error regenerating response',
-        description: 'An error occurred. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentConversation, isLoading, currentConversationId, setConversations, toast]);
+      setConversations(updatedConversations);
+  
+      const historyWithoutLastResponse = updatedConversations.find(c => c.id === currentConversationId)?.messages || [];
+      const lastUserMessage = historyWithoutLastResponse[historyWithoutLastResponse.length - 1];
+      const content = lastUserMessage ? lastUserMessage.content : '';
+  
+      if (!content) {
+        setIsLoading(false);
+        return;
+      }
+  
+      try {
+        // Random delay 1-2 seconds for natural flow
+        const delay = Math.random() * 1000 + 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+
+        const sentimentResult = await analyzeBanglaSentiment(content);
+        const sentimentResponses = {
+          positive: [
+            'আপনার কথা শুনে খুব ভালো লাগল! আরও কিছু বলুন।',
+            'আপনার ইতিবাচক মনোভাব আমাকে উৎসাহিত করে। ধন্যবাদ!',
+            'চমৎকার! আপনার মতামত আমার কাছে মূল্যবান।'
+          ],
+          negative: [
+            'দুঃখিত যে আপনার এমন অনুভূতি হচ্ছে। আমি সাহায্য করতে চাই।',
+            'আপনার কথা শুনে দুঃখ লাগল। কিভাবে উন্নত করতে পারি?',
+            'আমি আপনার পাশে আছি। আরও বিস্তারিত বলুন।'
+          ],
+          neutral: [
+            'আমি আপনার কথা শুনছি। আরও বিস্তারিত বলুন।',
+            'আপনার বক্তব্য বুঝতে চেষ্টা করছি। কোনো নির্দিষ্ট প্রশ্ন আছে?',
+            'আমি এখানে আছি আপনাকে সাহায্য করার জন্য।'
+          ]
+        };
+        const responses = sentimentResponses[sentimentResult.sentiment] || sentimentResponses.neutral;
+        const regeneratedResponse = responses[Math.floor(Math.random() * responses.length)];
+
+        const assistantMessage: Message = {
+          id: uuidv4(),
+          role: 'assistant',
+          content: regeneratedResponse,
+          createdAt: new Date().toISOString(),
+        };
+
+        setConversations(prev =>
+          prev.map(c =>
+            c.id === currentConversationId
+              ? { ...c, messages: [...historyWithoutLastResponse, assistantMessage] }
+              : c
+          )
+        );
+      } catch (error) {
+        console.error('Error regenerating response:', error);
+        toast({
+          title: 'Error regenerating response',
+          description: 'An error occurred. Please try again.',
+          variant: 'destructive',
+        });
+        const fallbackResponse = 'আমি আপনার কথা শুনছি। আরও বিস্তারিত বলুন।';
+        const assistantMessage: Message = {
+          id: uuidv4(),
+          role: 'assistant',
+          content: fallbackResponse,
+          createdAt: new Date().toISOString(),
+        };
+        setConversations(prev =>
+          prev.map(c =>
+            c.id === currentConversationId
+              ? { ...c, messages: [...historyWithoutLastResponse, assistantMessage] }
+              : c
+          )
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    }, [currentConversation, isLoading, currentConversationId, setConversations, conversations, toast]);
 
   const deleteConversation = useCallback((id: string) => {
     setConversations(prev => prev.filter(c => c.id !== id));

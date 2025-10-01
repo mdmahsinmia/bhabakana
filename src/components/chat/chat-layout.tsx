@@ -22,7 +22,7 @@ export function ChatLayout() {
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full">
-        <Sidebar className="w-full md:w-[260px]" collapsible="offcanvas">
+        <Sidebar className="w-full md:w-[260px] glass glass-dark smooth-transition" collapsible="offcanvas">
           <SidebarHeader>
             <div className="flex w-full items-center justify-between p-2">
               <div className="flex items-center gap-2">
@@ -34,7 +34,7 @@ export function ChatLayout() {
           <SidebarContent className="p-2">
             <Button
               variant="outline"
-              className="w-full justify-start"
+              className="w-full justify-start smooth-transition"
               onClick={createNewConversation}
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -51,7 +51,7 @@ export function ChatLayout() {
 
         <SidebarInset className="flex flex-col">
           <div className="flex h-full flex-col">
-            <header className="flex h-14 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur-sm md:px-6">
+            <header className="flex h-14 items-center gap-4 border-b glass glass-dark smooth-transition px-4 backdrop-blur-sm md:px-6">
               <div>
                 <SidebarTrigger />
               </div>

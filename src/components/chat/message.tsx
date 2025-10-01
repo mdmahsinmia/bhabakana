@@ -32,7 +32,7 @@ export function Message({ message }: MessageProps) {
   return (
     <div
       className={cn(
-        'group flex items-start gap-4',
+        'group flex items-start gap-4 smooth-transition',
         isUser && 'flex-row-reverse'
       )}
     >
@@ -48,10 +48,10 @@ export function Message({ message }: MessageProps) {
       </Avatar>
       <div
         className={cn(
-          'relative max-w-[80%] space-y-1 rounded-lg px-4 py-2.5',
+          'relative max-w-[80%] space-y-1 rounded-lg px-4 py-2.5 backdrop-blur-sm glass glass-dark smooth-transition',
           isUser
-            ? 'rounded-br-none bg-primary text-primary-foreground'
-            : 'rounded-bl-none bg-card'
+            ? 'rounded-br-none text-primary-foreground'
+            : 'rounded-bl-none'
         )}
       >
         <div className="prose prose-sm whitespace-pre-wrap font-body text-sm leading-relaxed text-inherit">
