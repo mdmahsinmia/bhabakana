@@ -21,30 +21,59 @@ export const sendMessage = createAsyncThunk(
   async ({ message, sessionId, useStreaming = true }: { message: string; sessionId: string; useStreaming?: boolean }, { rejectWithValue }) => {
     try {
       const endpoint = useStreaming ? 'http://localhost:5000/api/chat/stream' : 'http://localhost:5000/api/chat';
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message,
-          sessionId,
-          temperature: 0.7,
-          maxTokens: 1024,
-        }),
-      });
+      
+      // Add timeout to the fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-      if (!response.ok) {
-        const error = await response.json();
-        return rejectWithValue(error.error || 'Failed to send message');
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message,
+            sessionId,
+            temperature: 0.7,
+            maxTokens: 1024,
+          }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const error = await response.json();
+          return rejectWithValue(error.error || 'Failed to send message');
+        }
+
+        if (useStreaming) {
+          // Return only the response object for streaming, which will be handled by the component
+          return {
+            streaming: true,
+            response
+          };
+        }
+
+        const data = await response.json();
+        // console.log('response----->', data.message)
+        return { message: data.message, sessionId: data.sessionId };
+      } catch (error) {
+        clearTimeout(timeoutId);
+        if (error instanceof Error) {
+          if (error.name === 'AbortError') {
+            return rejectWithValue('Request timed out. Please try again.');
+          }
+          if (error.message.includes('Failed to fetch')) {
+            return rejectWithValue('Could not connect to the server. Please check your connection.');
+          }
+        }
+        throw error;
       }
-
-      if (useStreaming) {
-        return { streaming: true, response };
-      }
-
-      const data = await response.json();
-      return { message: data.message, sessionId: data.sessionId };
     } catch (error) {
-      return rejectWithValue('Failed to send message');
+      if (error instanceof Error) {
+        return rejectWithValue(error.message || 'Failed to send message');
+      }
+      return rejectWithValue('An unexpected error occurred');
     }
   }
 );
