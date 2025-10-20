@@ -1,9 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useChat } from "@/hooks/use-chat";
+import { Card, CardContent } from "@/components/ui/card";
 import { Bot } from "lucide-react";
+import { addMessage } from "@/store/features/chat/chatSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 const examplePrompts = [
   "জীবনের অর্থ কী?",
@@ -13,7 +14,17 @@ const examplePrompts = [
 ];
 
 export function EmptyScreen() {
-  const { addMessage } = useChat();
+  const dispatch = useAppDispatch();
+  const currentConversationId = useAppSelector(state => state.chat.currentConversationId);
+
+  const handlePromptClick = (prompt: string) => {
+    if (currentConversationId) {
+      dispatch(addMessage({
+        conversationId: currentConversationId,
+        message: { role: "user", content: prompt }
+      }));
+    }
+  };
 
   return (
     <div className="flex h-full items-center justify-center">
@@ -31,7 +42,7 @@ export function EmptyScreen() {
             <Card
               key={i}
               className="cursor-pointer transition-shadow hover:shadow-md"
-              onClick={() => addMessage(prompt)}
+              onClick={() => handlePromptClick(prompt)}
             >
               <CardContent className="p-4">
                 <p className="text-sm">{prompt}</p>

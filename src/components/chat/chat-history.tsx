@@ -1,23 +1,20 @@
 "use client";
 
-import { useChat } from "@/hooks/use-chat";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarMenuAction,
-  SidebarMenuSkeleton,
 } from "@/components/ui/sidebar";
 import { MessageSquare, Trash2 } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setCurrentConversationId, clearConversation } from "@/store/features/chat/chatSlice";
 
 export function ChatHistory() {
-  const {
-    conversations,
-    currentConversation,
-    setCurrentConversationId,
-    deleteConversation,
-  } = useChat();
+  const dispatch = useAppDispatch();
+  const conversations = useAppSelector(state => state.chat.conversations);
+  const currentConversationId = useAppSelector(state => state.chat.currentConversationId);
 
   if (!conversations.length) {
     return (
@@ -33,8 +30,8 @@ export function ChatHistory() {
         {conversations.map((conversation) => (
           <SidebarMenuItem key={conversation.id}>
             <SidebarMenuButton
-              isActive={currentConversation?.id === conversation.id}
-              onClick={() => setCurrentConversationId(conversation.id)}
+              isActive={currentConversationId === conversation.id}
+              onClick={() => dispatch(setCurrentConversationId(conversation.id))}
               tooltip={conversation.title}
             >
               <MessageSquare />
@@ -44,7 +41,7 @@ export function ChatHistory() {
               aria-label="Delete conversation"
               onClick={(e) => {
                 e.stopPropagation();
-                deleteConversation(conversation.id);
+                dispatch(clearConversation(conversation.id));
               }}
               showOnHover
             >

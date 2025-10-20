@@ -10,19 +10,23 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { useChat } from "@/hooks/use-chat";
 import { ChatHistory } from "./chat-history";
 import { ChatPanel } from "./chat-panel";
 import { ThemeToggle } from "../theme-toggle";
 import { Bot, Plus } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { createNewConversation } from "@/store/features/chat/chatSlice";
 
 export function ChatLayout() {
-  const { createNewConversation } = useChat();
+  const dispatch = useAppDispatch();
+  const currentConversation = useAppSelector(state => 
+    state.chat.conversations.find(conv => conv.id === state.chat.currentConversationId)
+  );
 
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full">
-        <Sidebar className="w-full md:w-[260px] glass glass-dark smooth-transition" collapsible="offcanvas">
+        <Sidebar className="w-full md:w-[260px]" collapsible="offcanvas">
           <SidebarHeader>
             <div className="flex w-full items-center justify-between p-2">
               <div className="flex items-center gap-2">
@@ -35,10 +39,10 @@ export function ChatLayout() {
             <Button
               variant="outline"
               className="w-full justify-start smooth-transition"
-              onClick={createNewConversation}
+              onClick={() => dispatch(createNewConversation())}
             >
               <Plus className="mr-2 h-4 w-4" />
-              নতুন চ্যাট
+              New Chat
             </Button>
             <ChatHistory />
           </SidebarContent>
@@ -51,13 +55,13 @@ export function ChatLayout() {
 
         <SidebarInset className="flex flex-col">
           <div className="flex h-full flex-col">
-            <header className="flex h-14 items-center gap-4 border-b glass glass-dark smooth-transition px-4 backdrop-blur-sm md:px-6">
+            <header className="flex h-14 items-center gap-4 border-b px-4 backdrop-blur-sm md:px-6">
               <div>
                 <SidebarTrigger />
               </div>
               <div className="flex-1">
                 <h2 className="truncate text-lg font-semibold">
-                  {/* Title can go here */}
+                  {currentConversation?.title}
                 </h2>
               </div>
             </header>

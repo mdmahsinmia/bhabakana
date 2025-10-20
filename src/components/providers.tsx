@@ -2,8 +2,9 @@
 
 import type { ReactNode } from 'react';
 import { ThemeProvider } from '@/contexts/theme-provider';
-import { ChatProvider } from '@/contexts/chat-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { Provider } from 'react-redux';
+import { store } from '@/store';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -11,10 +12,12 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-      <TooltipProvider delayDuration={0}>
-        <ChatProvider>{children}</ChatProvider>
-      </TooltipProvider>
-    </ThemeProvider>
+    <Provider store={store}>
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        <TooltipProvider delayDuration={0}>
+          {children}
+        </TooltipProvider>
+      </ThemeProvider>
+    </Provider>
   );
 }
