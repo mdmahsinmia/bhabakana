@@ -50,6 +50,7 @@ if (!process.env.OPENROUTER_API_KEY) {
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/auth/connect', socialRoutes);
+// console.log(app)
 
 // Chat endpoints (non-streaming + streaming)
 // Make sure controllers/chatController.js exports `chat` and `streamChat`

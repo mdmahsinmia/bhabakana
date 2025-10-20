@@ -1,7 +1,12 @@
 // components/Layout.tsx
 import React, {PropsWithChildren} from 'react';
+import { useAuth } from '@/contexts/auth-context';
+import { useToast } from '@/hooks/use-toast';
+import { authService } from '@/lib/auth-service';
 
 export default function Layout({ children }: PropsWithChildren) {
+  const { logout } = useAuth();
+  const { toast } = useToast();
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-white via-pink-50 to-pink-100">
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-pink-100/50 shadow-sm">
@@ -38,18 +43,68 @@ export default function Layout({ children }: PropsWithChildren) {
                 </a>
               </li>
               <li>
-                <button className="px-6 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium rounded-md  border transition-all duration-200">
+                <button 
+                  onClick={async () => {
+                    try {
+                      await authService.logout();
+                      logout();
+                      toast({
+                        title: "Success",
+                        description: "You have been signed out successfully",
+                        variant: "default",
+                      });
+                    } catch (error) {
+                      toast({
+                        title: "Error",
+                        description: "Failed to sign out. Please try again.",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  className="px-6 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium rounded-md border transition-all duration-200 hover:shadow-lg"
+                >
                   Sign Out
                 </button>
               </li>
             </ul>
 
             {/* Mobile Menu Button */}
-            <button className="md:hidden p-2 rounded-lg hover:bg-pink-100 transition-colors">
-              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+            <div className="md:hidden relative">
+              <button className="p-2 rounded-lg hover:bg-pink-100 transition-colors" onClick={() => document.getElementById('mobile-menu')?.classList.toggle('hidden')}>
+                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              
+              {/* Mobile Menu Dropdown */}
+              <div id="mobile-menu" className="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50">
+                <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-pink-50">Dashboard</a>
+                <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-pink-50">Generate Post</a>
+                <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-pink-50">My Posts</a>
+                <button 
+                  onClick={async () => {
+                    try {
+                      await authService.logout();
+                      logout();
+                      toast({
+                        title: "Success",
+                        description: "You have been signed out successfully",
+                        variant: "default",
+                      });
+                    } catch (error) {
+                      toast({
+                        title: "Error",
+                        description: "Failed to sign out. Please try again.",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  className="w-full text-left px-4 py-2 text-red-600 hover:bg-pink-50"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
           </div>
         </nav>
       </header>

@@ -1,5 +1,12 @@
-import DashboardLayout from '@/components/dashboard/Dashboard';
+'use client';
 
-export default function Home() {
-  return <DashboardLayout />;
+import DashboardLayout from '@/components/dashboard/Dashboard';
+import { ProtectedRoute } from '@/components/auth/protected-route';
+
+export default function Dashboard() {
+  return (
+    <ProtectedRoute>
+      <DashboardLayout />
+    </ProtectedRoute>
+  );
 }

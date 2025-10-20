@@ -457,23 +457,16 @@ export default function Dashboard() {
                 <div className="flex justify-center items-center h-[300px]">
                   {/* Animated border wrapper */}
                   <div className="relative group">
-                    {/* Rotating gradient border background */}
-                    <div className="absolute -inset-1 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 rounded-2xl opacity-75 group-hover:opacity-100 transition-opacity duration-300 blur-sm animate-pulse"></div>
-
-                    {/* Second border layer for more glow */}
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 rounded-2xl opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-
                     {/* Main button */}
-                    <button className="relative p-8 rounded-2xl font-semibold bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 text-white hover:shadow-2xl hover:scale-110 transition-all duration-300 flex flex-col items-center space-y-3 backdrop-blur-sm">
-                      <div className="flex flex-col items-center space-y-3">
-                        <div className="group-hover:animate-spin transition-transform">
-                          <Sparkles className="w-12 h-12 text-white" />
-                        </div>
+                    <button className="relative p-8 ">
+                      <div className="flex flex-col items-center justify-center space-y-3">
+                        <Sparkles className=" w-10 h-10 text-pink-400 animate-spin animation-delay-200" />
+
                         <div className="text-center">
-                          <h3 className="text-2xl font-bold text-white">
+                          <h3 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
                             Generate Post Content
                           </h3>
-                          <p className="text-sm font-medium text-white/90 mt-1">
+                          <p className="text-sm font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
                             Powered by AI
                           </p>
                         </div>

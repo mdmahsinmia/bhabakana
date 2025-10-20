@@ -1,12 +1,13 @@
-import type { Metadata } from 'next';
-import './globals.css';
-import { Providers } from '@/components/providers';
-import { Toaster } from '@/components/ui/toaster';
-import { cn } from '@/lib/utils';
+import type { Metadata } from "next";
+import "./globals.css";
+import { Providers } from "@/components/providers";
+import { Toaster } from "@/components/ui/toaster";
+import { cn } from "@/lib/utils";
+import { AuthProvider } from "@/contexts/auth-context";
 
 export const metadata: Metadata = {
-  title: 'NextChat',
-  description: 'A modern, responsive ChatGPT-like frontend application.',
+  title: "NextChat",
+  description: "A modern, responsive ChatGPT-like frontend application.",
 };
 
 export default function RootLayout({
@@ -18,15 +19,30 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
       </head>
-      <body className={cn('font-body antialiased')}>
+      <body className={cn("font-body antialiased")}>
         <Providers>
-          {children}
-          <Toaster />
+          <AuthProvider>
+            {children}
+            <Toaster />
+          </AuthProvider>
         </Providers>
       </body>
     </html>

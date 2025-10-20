@@ -29,9 +29,21 @@ export default function landingPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.6 }}
+          className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <Button size="lg" className="bg-pink-600 hover:bg-pink-700 text-white text-lg px-8 py-6 rounded-full">
+          <Button 
+            size="lg" 
+            className="bg-pink-600 hover:bg-pink-700 text-white text-lg px-8 py-6 rounded-full"
+            onClick={() => window.location.href = '/login'}
+          >
             Try Free Now
+          </Button>
+          <Button 
+            size="lg" 
+            className="bg-white hover:bg-gray-100 text-pink-600 border border-pink-600 text-lg px-8 py-6 rounded-full"
+            onClick={() => window.location.href = '/register'}
+          >
+            Get Started Now
           </Button>
         </motion.div>
       </section>
