@@ -54,7 +54,7 @@ export default function PlatformCard({
             className={`w-full font-semibold transition-all duration-300 ${
               isConnected
                 ? "bg-gradient-to-r from-pink-100 to-purple-100 text-pink-600 hover:from-pink-200 hover:to-purple-200 border-2 border-pink-300/50"
-                : "bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white shadow-sm hover:shadow-xl"
+                : "bg-gradient-to-r from-pink-300 to-purple-400 hover:from-pink-400 hover:to-purple-500 text-white shadow-sm hover:shadow-xl"
             }`}
             disabled={isConnected}
           >

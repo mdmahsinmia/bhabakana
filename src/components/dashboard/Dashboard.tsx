@@ -1,14 +1,14 @@
 // pages/dashboard.tsx
 "use client";
 import React, { useState, useEffect } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import Layout from "./Layout";
 import PlatformCard from "./PlatformCard";
 import GeneratedPostModal from "./GeneratedPostModal";
 import { Sparkles } from "lucide-react";
-import axios from 'axios';
-import { useToast } from '@/hooks/use-toast';
-import { getAuthToken } from '@/lib/cookies';
+import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
+import { getAuthToken } from "@/lib/cookies";
 // import { useAuth } from "../../context/AuthContext";
 
 export default function Dashboard() {
@@ -19,15 +19,18 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchConnectedPlatforms = async () => {
       const token = getAuthToken();
-      console.log('base url--->', process.env.NEXT_PUBLIC_BACKEND_URL)
+      // console.log('base url--->', process.env.NEXT_PUBLIC_BACKEND_URL)
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/connect/connected-platforms`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/connect/connected-platforms`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
         setConnectedPlatforms(response.data.platforms);
       } catch (error) {
         console.error("Error fetching connected platforms:", error);
@@ -43,10 +46,10 @@ export default function Dashboard() {
 
     // Check for connection status in URL
     const params = new URLSearchParams(window.location.search);
-    const status = params.get('status');
-    const platform = params.get('platform');
+    const status = params.get("status");
+    const platform = params.get("platform");
 
-    if (status === 'success' && platform) {
+    if (status === "success" && platform) {
       toast({
         title: "Success",
         description: `${platform} connected successfully!`,
@@ -87,7 +90,7 @@ export default function Dashboard() {
       console.error(`Error connecting ${platform}:`, error);
       toast({
         title: "Error",
-        description: `Failed to connect ${platform}. Please try again.`, 
+        description: `Failed to connect ${platform}. Please try again.`,
         variant: "destructive",
       });
     }
@@ -192,9 +195,7 @@ export default function Dashboard() {
   const [inptTopic, setInputTopic] = useState("");
   const [category, setCategory] = useState("");
   // Update the state to allow multiple selections
-  const [mediaType, setMediaType] = useState<("image" | "video" | "text")[]>(
-    []
-  );
+  const [mediaType, setMediaType] = useState<("image" | "text")[]>([]);
 
   const handleReset = () => {
     setStep(1);
@@ -227,7 +228,7 @@ export default function Dashboard() {
   };
 
   // Update the media type toggle handler
-  const toggleMediaType = (type: "image" | "video" | "text") => {
+  const toggleMediaType = (type: "image" | "text") => {
     setMediaType((prev) =>
       prev.includes(type) ? prev.filter((m) => m !== type) : [...prev, type]
     );
@@ -303,7 +304,13 @@ export default function Dashboard() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <button
-                    onClick={() => setContentType("trending")}
+                    onClick={() => {
+                      setContentType("trending");
+                      setStep(1);
+                      setCategory("");
+                      setMediaType([]);
+                      setInputTopic("");
+                    }}
                     className={`group relative overflow-hidden p-8 rounded-2xl border-2 transition-all duration-300 ${
                       contentType === "trending"
                         ? "border-pink-500 bg-gradient-to-br from-pink-50 to-purple-50 shadow-lg scale-105"
@@ -335,7 +342,13 @@ export default function Dashboard() {
                   </button>
 
                   <button
-                    onClick={() => setContentType("custom")}
+                    onClick={() => {
+                      setContentType("custom");
+                      setStep(1);
+                      setCategory("");
+                      setMediaType([]);
+                      setInputTopic("");
+                    }}
                     className={`group relative overflow-hidden p-8 rounded-2xl border-2 transition-all duration-300 ${
                       contentType === "custom"
                         ? "border-purple-500 bg-gradient-to-br from-purple-50 to-pink-50 shadow-lg scale-105"
@@ -382,7 +395,7 @@ export default function Dashboard() {
                 </div>
                 <div className="w-full">
                   <label className="block text-sm font-semibold text-gray-700 mb-3">
-                    Topic or Idea
+                    Write your idea or post content here
                     <span className=" text-gray-500 font-normal ml-1">
                       -- Be as specific as possible for better content
                       generation
@@ -393,7 +406,7 @@ export default function Dashboard() {
                     value={inptTopic}
                     onChange={(e) => setInputTopic(e.target.value)}
                     placeholder="e.g. Latest AI trends in 2025, sustainable fashion tips, upcoming tech gadgets, healthy recipes for beginners..."
-                    className="w-full border-2 border-gray-200 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all resize-none bg-white/70 backdrop-blur-sm"
+                    className="w-full dark:text-gray-700 border-2 border-gray-200 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all resize-none bg-white/70 backdrop-blur-sm"
                   />
                 </div>
               </div>
@@ -442,7 +455,7 @@ export default function Dashboard() {
                     Select the type(s) of media for your post
                   </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="flex justify-center items-center gap-6">
                   <button
                     onClick={() => toggleMediaType("image")}
                     className={`group relative overflow-hidden p-8 rounded-2xl border-2 transition-all duration-300 ${
@@ -475,7 +488,7 @@ export default function Dashboard() {
                     )}
                   </button>
 
-                  <button
+                  {/*<button
                     onClick={() => toggleMediaType("video")}
                     className={`group relative overflow-hidden p-8 rounded-2xl border-2 transition-all duration-300 ${
                       mediaType.includes("video")
@@ -505,7 +518,7 @@ export default function Dashboard() {
                         </svg>
                       </div>
                     )}
-                  </button>
+                  </button>*/}
 
                   <button
                     onClick={() => toggleMediaType("text")}
@@ -591,7 +604,8 @@ export default function Dashboard() {
             {step === 1 && <div />}
 
             <div className="flex gap-3">
-              {step < 4 ? (
+              {step < 3 ? (
+                // Step 1-2: Continue button
                 <button
                   onClick={handleNext}
                   disabled={!canProceed()}
@@ -603,15 +617,27 @@ export default function Dashboard() {
                 >
                   Continue →
                 </button>
+              ) : step === 3 ? (
+                // Step 3: Generate button
+                <button
+                  onClick={handleNext}
+                  disabled={!canProceed()}
+                  className={`px-8 py-3 rounded-xl font-semibold transition-all ${
+                    canProceed()
+                      ? "bg-gradient-to-r from-green-500 to-teal-500 text-white hover:shadow-lg hover:scale-105"
+                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  }`}
+                >
+                  Generate
+                </button>
               ) : (
-                <>
-                  <button
-                    onClick={handleReset}
-                    className="px-6 py-3 rounded-xl font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </>
+                // Step 4+: Cancel button
+                <button
+                  onClick={handleReset}
+                  className="px-6 py-3 rounded-xl font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
+                >
+                  Cancel
+                </button>
               )}
             </div>
           </div>
