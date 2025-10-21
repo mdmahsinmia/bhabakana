@@ -9,7 +9,7 @@ const socialAccountSchema = new mongoose.Schema({
   expiresAt:    { type: Date },
   scopes:       [String],
   connectedAt:  { type: Date, default: Date.now },
-  status:       { type: String, enum: ['connected','error','revoked'], default: 'connected' },
+  status:       { type: String, enum: ['connected','disconnected','expired'], default: 'connected' },
 }, { timestamps: true });
 
 export default mongoose.model('SocialAccount', socialAccountSchema);

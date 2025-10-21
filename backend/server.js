@@ -9,6 +9,7 @@ import postRoutes from './routes/postRoutes.js';
 import socialRoutes from './routes/socialRoutes.js';
 import { chat, streamChat } from './controllers/chatController.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import session from 'express-session';
 
 dotenv.config();
 
@@ -16,6 +17,13 @@ dotenv.config();
 await connectDB();
 
 const app = express();
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'supersecret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: process.env.NODE_ENV === 'production' }
+}));
 
 // CORS - allow custom header x-api-key used by your client
 app.use(

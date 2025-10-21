@@ -1,11 +1,18 @@
 import express from 'express';
 import { authenticate } from '../middleware/authMiddleware.js';
-import { connectPlatform, callbackPlatform } from '../controllers/socialController.js';
+import * as socialController from '../controllers/socialController.js';
 
 const router = express.Router();
 
+router.get('/facebook/pages', socialController.getFacebookPages);
+router.post('/facebook/select-page', socialController.selectFacebookPage);
+
+router.get('/connected-platforms', authenticate, socialController.getConnectedPlatforms);
+
+router.get('/:platform', authenticate, socialController.connectPlatform);
+router.get('/callback/:platform', socialController.callbackPlatform);
+
+
 router.use(authenticate);
-router.post('/connect/:platform', connectPlatform);
-router.get('/callback/:platform', callbackPlatform);
 
 export default router;
