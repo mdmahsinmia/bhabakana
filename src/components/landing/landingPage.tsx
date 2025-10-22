@@ -34,14 +34,14 @@ export default function landingPage() {
           <Button 
             size="lg" 
             className="bg-pink-600 hover:bg-pink-700 text-white text-lg px-8 py-6 rounded-full"
-            onClick={() => window.location.href = '/login'}
+            onClick={() => window.location.href = '/dashboard'}
           >
             Try Free Now
           </Button>
           <Button 
             size="lg" 
             className="bg-white hover:bg-gray-100 text-pink-600 border border-pink-600 text-lg px-8 py-6 rounded-full"
-            onClick={() => window.location.href = '/register'}
+            onClick={() => window.location.href = '/dashboard'}
           >
             Get Started Now
           </Button>

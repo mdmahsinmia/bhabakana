@@ -75,6 +75,30 @@ export const updatePost = createAsyncThunk(
   }
 );
 
+interface DeletePostArgs {
+  postId: string;
+  token: string;
+}
+
+export const deletePost = createAsyncThunk(
+    'posts/deletePost',
+  async ({ postId, token }: DeletePostArgs, { rejectWithValue }) => {
+    try {
+      const response = await axios.delete(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/posts/${postId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data.message || error.message);
+    }
+  }
+);
+
 const postsSlice = createSlice({
   name: 'posts',
   initialState,

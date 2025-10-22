@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getAuthToken } from "@/lib/cookies";
 import { useAuth } from "@/contexts/auth-context";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchPosts } from "@/store/features/posts/postsSlice";
+import { deletePost, fetchPosts } from "@/store/features/posts/postsSlice";
 
 export default function Dashboard() {
   const dispatch = useAppDispatch();
@@ -136,6 +136,41 @@ export default function Dashboard() {
     { id: "fashion", label: "Fashion", icon: "👗" },
   ];
 
+  const ContentTone = [
+    // 🎯 Core Tones
+    { id: "casual", label: "Casual", icon: "💬" },
+    { id: "professional", label: "Professional", icon: "💼" },
+    { id: "marketing", label: "Marketing", icon: "📢" },
+    { id: "inspirational", label: "Inspirational", icon: "🌟" },
+    { id: "informative", label: "Informative", icon: "📚" },
+    { id: "creative", label: "Creative", icon: "🎨" },
+
+    // 💬 Social Media Friendly
+    { id: "funny", label: "Funny", icon: "😂" },
+    { id: "trendy", label: "Trendy", icon: "🔥" },
+    { id: "storytelling", label: "Storytelling", icon: "📖" },
+    { id: "conversational", label: "Conversational", icon: "🗣️" },
+    { id: "emotional", label: "Emotional", icon: "❤️" },
+
+    // 💼 Business & Brand-Oriented
+    { id: "corporate", label: "Corporate", icon: "🏢" },
+    { id: "authoritative", label: "Authoritative", icon: "🧠" },
+    { id: "persuasive", label: "Persuasive", icon: "🎯" },
+    { id: "analytical", label: "Analytical", icon: "📊" },
+    { id: "thought_leadership", label: "Thought Leadership", icon: "💡" },
+
+    // 🌈 Creative & Niche Styles
+    { id: "minimalist", label: "Minimalist", icon: "⚪" },
+    { id: "luxury", label: "Luxury", icon: "💎" },
+    { id: "friendly", label: "Friendly", icon: "🤝" },
+    { id: "bold", label: "Bold", icon: "🔥" },
+    {
+      id: "inspirational_storyteller",
+      label: "Inspirational Storyteller",
+      icon: "📜",
+    },
+  ];
+
   const [step, setStep] = useState(1);
   const [contentType, setContentType] = useState<"trending" | "custom" | null>(
     null
@@ -161,6 +196,8 @@ export default function Dashboard() {
       setStep(3);
     } else if (step === 3 && mediaType.length > 0) {
       setStep(4);
+    } else {
+      setStep(5);
     }
   };
 
@@ -332,6 +369,38 @@ export default function Dashboard() {
     }
   };
 
+  const handleDelete = async (post: any) => {
+    if (!post?._id) {
+      console.error("Post ID is missing for update.");
+      return;
+    }
+
+    const token = getAuthToken();
+    if (!token) {
+      console.error("Authentication token not found.");
+      return;
+    }
+
+    const updatedPostData = {
+      _id: post._id,
+    };
+
+    dispatch(deletePost({ postId: post._id, token }))
+      .unwrap()
+      .then(() => {
+        // onClose();
+        dispatch(fetchPosts());
+      })
+      .catch((error) => {
+        console.error("Failed to update post:", error);
+      });
+
+    toast({
+      title: "Success",
+      description: "Post deleted successfuly!",
+    });
+  };
+
   // Publish post in facebook page. i have page accesstoken
   const handlePublished = async (
     value: any,
@@ -448,7 +517,7 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center gap-2 mt-4">
-              {[1, 2, 3, 4].map((s) => (
+              {[1, 2, 3, 4, 5].map((s) => (
                 <div key={s} className="flex items-center">
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
@@ -461,7 +530,7 @@ export default function Dashboard() {
                   >
                     {s < step ? "✓" : s}
                   </div>
-                  {s < 4 && (
+                  {s < 5 && (
                     <div
                       className={`w-12 h-1 mx-1 rounded ${
                         s < step
@@ -741,8 +810,40 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Step 4: Generate Post */}
+            {/* Step 4: Category Selection (only for trending) */}
             {step === 4 && (
+              <div className="space-y-6 animate-fadeIn">
+                <div className="text-center mb-8">
+                  <h3 className="text-2xl font-semibold text-gray-800 mb-2">
+                    Select Content Tone
+                  </h3>
+                  <p className="text-gray-600">
+                    Choose a content tone
+                  </p>
+                </div>
+                <div className="grid grid-cols-8 md:grid-cols-9 gap-4">
+                  {ContentTone.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setCategory(cat.id)}
+                      className={`p-4 rounded-2xl border-2 transition-all duration-300 ${
+                        category === cat.id
+                          ? "border-pink-500 bg-gradient-to-br from-pink-50 to-purple-50 shadow-lg scale-105"
+                          : "border-gray-200 bg-white hover:border-pink-300 hover:shadow-md"
+                      }`}
+                    >
+                      <div className="text-4xl mb-2">{cat.icon}</div>
+                      <div className="text-sm font-semibold text-gray-800">
+                        {cat.label}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Step 5: Generate Post */}
+            {step === 5 && (
               <div className="space-y-6 animate-in fade-in">
                 <div className="flex justify-center items-center h-[300px]">
                   {/* Animated border wrapper */}
@@ -790,7 +891,7 @@ export default function Dashboard() {
             {step === 1 && <div />}
 
             <div className="flex gap-3">
-              {step < 3 ? (
+              {step < 4 ? (
                 // Step 1-2: Continue button
                 <button
                   onClick={handleNext}
@@ -803,7 +904,7 @@ export default function Dashboard() {
                 >
                   Continue →
                 </button>
-              ) : step === 3 ? (
+              ) : step === 4 ? (
                 // Step 3: Generate button
                 <button
                   onClick={() => {
@@ -895,7 +996,7 @@ export default function Dashboard() {
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
-                    <span>Just now</span>
+                    <span>{new Date(post.createdAt).toLocaleString()}</span>
                   </div>
                 </div>
 
@@ -904,6 +1005,12 @@ export default function Dashboard() {
                   onClick={() => handleView(post)}
                 >
                   View
+                </button>
+                <button
+                  className="px-5 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium rounded-md hover:scale-105 transition-all duration-200 whitespace-nowrap"
+                  onClick={() => handleDelete(post)}
+                >
+                  Delete
                 </button>
                 <button
                   className="px-5 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium rounded-md hover:scale-105 transition-all duration-200 whitespace-nowrap"
