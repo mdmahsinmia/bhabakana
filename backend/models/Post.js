@@ -8,7 +8,7 @@ const postSchema = new mongoose.Schema({
   description:{ type: String },
   body:      { type: String },
   hashtags:  [String],
-  platforms: {type: String},
+  platform: {type: String},
   imagePrompt: { type: String },
   imageUrl:  { type: String },
   status:    { type: String, enum: ['draft','scheduled','published'], default: 'draft' },

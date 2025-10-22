@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 import { AuthProvider } from "@/contexts/auth-context";
 
 export const metadata: Metadata = {
-  title: "NextChat",
-  description: "A modern, responsive ChatGPT-like frontend application.",
+  title: "1ClikPost",
+  description: "AI-Powered Social Media Content Creator & Scheduler",
 };
 
 export default function RootLayout({

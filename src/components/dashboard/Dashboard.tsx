@@ -10,14 +10,20 @@ import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { getAuthToken } from "@/lib/cookies";
 import { useAuth } from "@/contexts/auth-context";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchPosts } from "@/store/features/posts/postsSlice";
 
 export default function Dashboard() {
+  const dispatch = useAppDispatch();
+  const { posts, isLoading, error } = useAppSelector((state) => state.posts);
+  // console.log("Post list:", posts);
   const { toast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([]);
 
   useEffect(() => {
+    dispatch(fetchPosts());
     const fetchConnectedPlatforms = async () => {
       const token = getAuthToken();
       // console.log('base url--->', process.env.NEXT_PUBLIC_BACKEND_URL)
@@ -107,73 +113,10 @@ export default function Dashboard() {
     // add as needed
   ];
 
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      platform: "LinkedIn",
-      title: "How AI Tools Are Reshaping the Creative Industry",
-      caption: null,
-      description:
-        "Explore how generative AI is becoming a partner for creatives and marketers alike—boosting productivity, enabling new forms of expression, and unlocking value in content workflows.",
-      body: "In today’s fast-moving creative economy, the emergence of generative AI tools is no longer a novelty—it’s a strategic advantage. From image and video generation to text creation and ideation, AI is transforming how teams and individuals produce content. Research shows these tools don’t just replace human creativity; they augment it, enabling new collaborations and higher output. :contentReference[oaicite:0]{index=0} \n\nFor marketing teams, agencies, and independent creators, this shift means faster turnaround times, improved consistency across channels, and the ability to iterate creatively. But it also raises important questions around ethics, copyright, and how we define originality. :contentReference[oaicite:1]{index=1} \n\nAt **1ClikPost**, we’re embracing the human + AI model: our platform empowers you to generate platform-optimized post content in seconds, while you retain control of voice, brand and image. Let’s move from “AI or human” to “AI and human.”",
-      hashtags: [
-        "#GenerativeAI",
-        "#CreativeTech",
-        "#ContentMarketing",
-        "#DigitalTransformation",
-        "#1ClikPost",
-      ],
-      imageUrl: null,
-    },
-    {
-      id: 2,
-      platform: "Twitter",
-      title: null,
-      caption: null,
-      description: null,
-      body: "🎨 + 🤖 = Creativity × Scale. Generative AI is now a creative partner—not replacing humans, but amplifying what we can do. #1ClikPost makes multi-platform posts in seconds. #AI #ContentCreation #SocialMedia",
-      hashtags: ["#AI", "#ContentCreation", "#SocialMedia", "#1ClikPost"],
-      imageUrl: null,
-    },
-    {
-      id: 3,
-      platform: "Instagram",
-      title: null,
-      caption:
-        "Imagine posting your next social media update in *minutes* instead of hours. With AI-powered content tools, your creative spark stays human – the heavy lifting gets done in seconds. 🎬✨ #1ClikPost is your new content side-kick. #creativity #aiart #socialmediatools",
-      description: null,
-      body: null,
-      hashtags: [
-        "#creativity",
-        "#aiart",
-        "#socialmediatools",
-        "#digitalcreator",
-        "#1ClikPost",
-      ],
-      imageUrl: null,
-    },
-    {
-      id: 4,
-      platform: "Facebook",
-      title: "Transform Your Content Game with AI",
-      caption: null,
-      description: null,
-      body: "Whether you’re a small business, a creator, or part of a marketing team, staying consistent on social media can feel overwhelming. Enter generative AI—tools that help you ideate, write, edit and craft posts across Facebook, Instagram, Twitter and more. With **1ClikPost**, you select a topic or category, hit generate, then edit if needed and publish. Fast, flexible, and tailored for your voice. Let’s make content creation fun again. 🚀",
-      hashtags: [
-        "#GenerativeAI",
-        "#SocialMediaTips",
-        "#ContentMarketing",
-        "#1ClikPost",
-      ],
-      imageUrl: null,
-    },
-  ]);
-  const [selectedPost, setSelectedPost] = useState<(typeof posts)[0] | null>(
-    null
-  );
+  const [selectedPost, setSelectedPost] = useState<any | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const handleView = (post: (typeof posts)[0]) => {
+  const handleView = (post: any) => {
     setSelectedPost(post);
     setModalOpen(true);
   };
@@ -356,6 +299,7 @@ export default function Dashboard() {
       console.log("post created", resPost.data);
 
       if (resPost.status === 201) {
+        dispatch(fetchPosts());
         setStep(1);
         setContentType(null);
         setCategory("");
@@ -826,7 +770,7 @@ export default function Dashboard() {
         <div className="space-y-3">
           {posts.map((post) => (
             <div
-              key={post.id}
+              key={post._id}
               className="group relative backdrop-blur-sm bg-white/80 border border-pink-100 rounded-xl p-5 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 hover:border-pink-300"
             >
               {/* Gradient accent bar */}
@@ -837,12 +781,12 @@ export default function Dashboard() {
                   <div className="flex items-center gap-3 mb-2">
                     {/* Platform badge */}
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-pink-100 to-purple-100 text-purple-700 border border-pink-200">
-                      {post.platform}
+                      {post?.platform}
                     </span>
                   </div>
 
                   <div className="font-semibold text-gray-800 text-lg mb-1 truncate group-hover:text-pink-600 transition-colors">
-                    {post.title || post.caption}
+                    {post.title || post.caption || post.body}
                   </div>
 
                   <div className="text-sm text-gray-500 flex items-center gap-2">
