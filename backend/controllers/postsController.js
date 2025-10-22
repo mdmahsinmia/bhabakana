@@ -2,8 +2,13 @@ import Post from '../models/Post.js';
 
 export const createPost = async (req, res, next) => {
   try {
-    const post = await Post.create({ ...req.body, userId: req.user._id });
-    res.status(201).json(post);
+    const { posts } = req.body;
+    const createdPosts = await Promise.all(
+      posts.map(async (postData) => {
+        return await Post.create({ ...postData, userId: req.user._id });
+      })
+    );
+    res.status(201).json(createdPosts);
   } catch (err) {
     next(err);
   }

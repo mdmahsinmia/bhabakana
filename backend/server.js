@@ -7,6 +7,7 @@ import { connectDB } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import socialRoutes from './routes/socialRoutes.js';
+import contentRoutes from './routes/contentRoutes.js';
 import { chat, streamChat } from './controllers/chatController.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import session from 'express-session';
@@ -58,6 +59,7 @@ if (!process.env.OPENROUTER_API_KEY) {
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/auth/connect', socialRoutes);
+app.use('/api/content', contentRoutes);
 // console.log(app)
 
 // Chat endpoints (non-streaming + streaming)

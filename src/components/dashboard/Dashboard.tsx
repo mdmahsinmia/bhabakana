@@ -9,10 +9,11 @@ import { Sparkles } from "lucide-react";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { getAuthToken } from "@/lib/cookies";
-// import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function Dashboard() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const router = useRouter();
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([]);
 
@@ -232,6 +233,141 @@ export default function Dashboard() {
     setMediaType((prev) =>
       prev.includes(type) ? prev.filter((m) => m !== type) : [...prev, type]
     );
+  };
+
+  const handleGenerate = async () => {
+    try {
+      let topicText = "";
+
+      if (contentType === "custom") {
+        topicText = inptTopic.trim();
+      } else if (contentType === "trending") {
+        // Placeholder for trending topic based on category
+        topicText = `Trending topic in ${category} category`;
+      }
+
+      const includeImage = mediaType.includes("image");
+
+      const token = getAuthToken();
+      if (!user || !token) {
+        toast({
+          title: "Error",
+          description: "You must be signed in to generate content.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/content/generator`,
+        {
+          topicText,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      type GeneratedTextContentItem = {
+        platform?: string | null;
+        title?: string | null;
+        caption?: string | null;
+        description?: string | null;
+        body?: string | null;
+        hashtags?: string[] | null;
+        imagePrompt: string | null;
+        imageUrl?: string | null;
+        [key: string]: any;
+      };
+
+      const generatedTextContent: GeneratedTextContentItem[] = response.data;
+      const requiredKeys: Required<GeneratedTextContentItem> = {
+        platform: null,
+        title: null,
+        caption: null,
+        description: null,
+        body: null,
+        hashtags: [],
+        imagePrompt: null,
+        imageUrl: null,
+      };
+
+      // Normalize every object in the array
+      const normalizedContent = generatedTextContent.map(
+        (item: GeneratedTextContentItem) => {
+          const normalizedItem: Required<GeneratedTextContentItem> & {
+            [key: string]: any;
+          } = { ...requiredKeys, ...item }; // fills missing keys
+          // Optional: ensure hashtags is always an array
+          if (!Array.isArray(normalizedItem.hashtags)) {
+            normalizedItem.hashtags = [];
+          }
+          return normalizedItem;
+        }
+      );
+
+      console.log("Normalized Content:", normalizedContent);
+
+      // create posts with normalizedContent array objects
+      const resPost = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/posts`,
+        { posts: normalizedContent },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log('post created', resPost.data)
+
+      
+      if (response.status === 200) {
+        setStep(1);
+        setContentType(null);
+        setCategory("");
+        setMediaType([]);
+        setInputTopic("");
+
+        toast({
+          title: "Success",
+          description: "Content generated successfully!",
+        });
+      }
+
+      // If user selected "image", generate image prompts separately
+      let generatedImagePrompts: Array<{
+        platform: string;
+        imageUrl: string;
+      }> = [];
+      if (includeImage) {
+        generatedImagePrompts = generatedTextContent.map((item: any) => ({
+          platform: item.platform,
+          imageUrl: `Generate an image based on: ${topicText}`, // simple placeholder
+        }));
+      }
+
+      // Merge text + image prompts
+      const finalContent = generatedTextContent.map((item: any) => ({
+        ...item,
+        imageUrl:
+          includeImage &&
+          generatedImagePrompts.find(
+            (img: any) => img.platform === item.platform
+          )?.imageUrl,
+      }));
+
+      // setGeneratedContent(finalContent);
+    } catch (error) {
+      console.error("Error generating content:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate content.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -620,7 +756,10 @@ export default function Dashboard() {
               ) : step === 3 ? (
                 // Step 3: Generate button
                 <button
-                  onClick={handleNext}
+                  onClick={() => {
+                    handleNext();
+                    handleGenerate();
+                  }}
                   disabled={!canProceed()}
                   className={`px-8 py-3 rounded-xl font-semibold transition-all ${
                     canProceed()

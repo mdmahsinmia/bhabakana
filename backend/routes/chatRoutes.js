@@ -4,7 +4,7 @@ import { apiKeyValidator } from '../middleware/apiKeyValidator';
 
 const router = Router();
 
-router.use('/api/', apiKeyValidator);
+router.use('/', apiKeyValidator);
 router.post('/api/chat', chat);
 
 export default router;
