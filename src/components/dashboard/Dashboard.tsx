@@ -20,7 +20,8 @@ export default function Dashboard() {
   const { toast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
-  const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([]);
+  const [connectedPlatforms, setConnectedPlatforms] = useState([]);
+  const [onlyPlatforms, setOnlyPlatforms] = useState<string[]>([]);
 
   useEffect(() => {
     dispatch(fetchPosts());
@@ -38,7 +39,10 @@ export default function Dashboard() {
           }
         );
 
-        setConnectedPlatforms(response.data.platforms);
+        setConnectedPlatforms(response.data);
+        setOnlyPlatforms(
+          response.data.map((acc: { platform: string }) => acc.platform)
+        );
       } catch (error) {
         console.error("Error fetching connected platforms:", error);
         toast({
@@ -328,6 +332,94 @@ export default function Dashboard() {
     }
   };
 
+  // Publish post in facebook page. i have page accesstoken
+  const handlePublished = async (
+    value: any,
+    postValues: any,
+    connectedPlatforms: Array<{
+      platform: string;
+      accountId: string;
+      accessToken: string;
+    }>
+  ) => {
+    const platformInfo = connectedPlatforms.find(
+      (account) => account.platform === value.toLowerCase()
+    );
+    if (!platformInfo) {
+      console.error("No connected platform info found for Facebook");
+      // show toast / error
+      return;
+    }
+
+    const pageId = platformInfo.accountId;
+    const accessToken = platformInfo.accessToken;
+
+    if (!pageId || !accessToken) {
+      console.error("Missing pageId or accessToken");
+      // show toast / error
+      return;
+    }
+
+    const message = postValues.title || "";
+    const imageUrl = postValues.imageUrl; // optional
+
+    if (value === "Facebook") {
+      try {
+        let response;
+
+        if (imageUrl) {
+          // Post with image
+          // Upload a photo to the Page; message included
+          response = await axios.post(
+            `https://graph.facebook.com/${pageId}/photos`,
+            {
+              message: message,
+              url: imageUrl,
+              access_token: accessToken,
+            }
+          );
+        } else {
+          // Post with just text
+          response = await axios.post(
+            `https://graph.facebook.com/${pageId}/feed`,
+            {
+              message: message,
+              access_token: accessToken,
+            }
+          );
+        }
+
+        const data = response.data;
+        if (data && (data.id || data.post_id)) {
+          toast({
+            title: "Success",
+            description: "Post published to Facebook successfully!",
+          });
+          // Optionally: dispatch update to your backend
+        } else {
+          console.warn("Facebook API returned no post ID", data);
+          toast({
+            title: "Error",
+            description: "Failed to publish post to Facebook (no id returned).",
+            variant: "destructive",
+          });
+        }
+      } catch (error: any) {
+        console.error("Error publishing to Facebook:", error);
+        const errMsg =
+          error.response?.data?.error?.message ||
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to publish post to Facebook.";
+        toast({
+          title: "Error",
+          description: errMsg,
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   return (
     <Layout>
       <section className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -338,7 +430,7 @@ export default function Dashboard() {
             platformName={p.name}
             totalPosts={p.total}
             importantInfo={p.info}
-            isConnected={connectedPlatforms.includes(p.name.toLowerCase())}
+            isConnected={onlyPlatforms.includes(p.name.toLowerCase())}
             onConnect={handleConnectPlatform}
           />
         ))}
@@ -812,6 +904,14 @@ export default function Dashboard() {
                   onClick={() => handleView(post)}
                 >
                   View
+                </button>
+                <button
+                  className="px-5 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-medium rounded-md hover:scale-105 transition-all duration-200 whitespace-nowrap"
+                  onClick={() =>
+                    handlePublished(post.platform, post, connectedPlatforms)
+                  }
+                >
+                  Published
                 </button>
               </div>
             </div>

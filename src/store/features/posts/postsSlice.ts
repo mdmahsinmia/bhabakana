@@ -49,6 +49,32 @@ export const fetchPosts = createAsyncThunk(
   }
 );
 
+interface UpdatePostArgs {
+  postId: string;
+  postData: Partial<Post>;
+  token: string;
+}
+
+export const updatePost = createAsyncThunk(
+  'posts/updatePost',
+  async ({ postId, postData, token }: UpdatePostArgs, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/posts/${postId}`,
+        postData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data.message || error.message);
+    }
+  }
+);
+
 const postsSlice = createSlice({
   name: 'posts',
   initialState,
@@ -64,6 +90,21 @@ const postsSlice = createSlice({
         state.posts = action.payload;
       })
       .addCase(fetchPosts.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(updatePost.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updatePost.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const index = state.posts.findIndex(post => post._id === action.payload._id);
+        if (index !== -1) {
+          state.posts[index] = action.payload;
+        }
+      })
+      .addCase(updatePost.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });

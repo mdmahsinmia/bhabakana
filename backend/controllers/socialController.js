@@ -348,10 +348,25 @@ export const selectFacebookPage = async (req, res, next) => {
 
 export const getConnectedPlatforms = async (req, res, next) => {
   try {
-    const userId = req.user._id;
+    // Assuming req.user._id is correctly set by an authentication middleware
+    const userId = req.user._id; 
+    
+    // 1. Fetch all connected accounts for the user
+    // Mongoose's .find() returns an array of documents (or plain objects if lean() is used)
     const connectedAccounts = await SocialAccount.find({ userId });
-    const platforms = connectedAccounts.map(account => account.platform);
-    res.json({ platforms });
+
+    // 2. Map the array to extract the required fields and structure
+    const platforms = connectedAccounts.map(account => ({
+      // Map the mongoose document fields to the new structure
+      platform: account.platform,
+      accountId: account.accountId,
+      accessToken: account.accessToken, // Be cautious about exposing tokens; consider security implications
+    }));
+
+    // 3. Send the response with the desired array structure
+    // Example output: [{platform: 'facebook', accountId: '12345', accessToken: 'EAA...'}]
+    res.json(platforms); 
+    
   } catch (err) {
     next(err);
   }

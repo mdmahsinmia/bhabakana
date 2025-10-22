@@ -1,10 +1,15 @@
 // components/GeneratedPostModal.tsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { getAuthToken } from '../../lib/cookies';
+import { updatePost } from '../../store/features/posts/postsSlice';
+import { toast } from '@/hooks/use-toast';
 
 interface GeneratedPostModalProps {
   isOpen: boolean;
   onClose: () => void;
   post: {
+    _id: string;
     platform: string;
     title: string | null | undefined;
     caption: string | null | undefined;
@@ -16,7 +21,24 @@ interface GeneratedPostModalProps {
 }
 
 export default function GeneratedPostModal({ isOpen, onClose, post }: GeneratedPostModalProps) {
-  
+  const dispatch = useAppDispatch();
+  const [title, setTitle] = useState(post?.title ?? '');
+  const [description, setDescription] = useState(post?.description ?? '');
+  const [body, setBody] = useState(post?.body ?? '');
+  const [hashtags, setHashtags] = useState(post?.hashtags.join(' ') ?? '');
+  const [imageUrl, setImageUrl] = useState(post?.imageUrl ?? '');
+  const [caption, setCaption] = useState(post?.caption ?? '');
+
+  useEffect(() => {
+    if (post) {
+      setTitle(post.title ?? '');
+      setDescription(post.description ?? '');
+      setBody(post.body ?? '');
+      setHashtags(post.hashtags.join(' ') ?? '');
+      setImageUrl(post.imageUrl ?? '');
+    }
+  }, [post]);
+
   // ✅ Prevent background scrolling
   useEffect(() => {
     if (isOpen) {
@@ -30,6 +52,44 @@ export default function GeneratedPostModal({ isOpen, onClose, post }: GeneratedP
   }, [isOpen]);
 
   if (!isOpen || !post) return null;
+
+
+  const handleUpdate = async() => {
+    if (!post?._id) {
+      console.error('Post ID is missing for update.');
+      return;
+    }
+
+    const token = getAuthToken();
+    if (!token) {
+      console.error('Authentication token not found.');
+      return;
+    }
+
+    const updatedPostData = {
+      _id: post._id,
+      title,
+      description,
+      body,
+      hashtags: hashtags.split(' ').filter(tag => tag.startsWith('#')),
+      imageUrl,
+      platform: post.platform, // Keep the original platform
+    };
+
+    dispatch(updatePost({ postId: post._id, postData: updatedPostData, token }))
+      .unwrap()
+      .then(() => {
+        onClose();
+      })
+      .catch((error) => {
+        console.error('Failed to update post:', error);
+      });
+
+    toast({
+          title: "Success",
+          description: "Post update successfuly!",
+        });
+  };
   
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-fadeIn">
@@ -78,7 +138,8 @@ export default function GeneratedPostModal({ isOpen, onClose, post }: GeneratedP
               </label>
               <input 
                 type="text" 
-                value={post.title ?? ''} 
+                value={title} 
+                onChange={(e) => setTitle(e.target.value)}
                 className="w-full backdrop-blur-sm bg-white/80 border-2 border-pink-200 rounded-xl px-4 py-3 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all duration-200 hover:border-pink-300"
                 placeholder="Enter post title..."
               />
@@ -93,7 +154,8 @@ export default function GeneratedPostModal({ isOpen, onClose, post }: GeneratedP
                 Description
               </label>
               <textarea 
-                value={post.description ?? ''} 
+                value={description} 
+                onChange={(e) => setDescription(e.target.value)}
                 className="w-full backdrop-blur-sm bg-white/80 border-2 border-pink-200 rounded-xl px-4 py-3 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all duration-200 hover:border-pink-300 resize-none" 
                 rows={3}
                 placeholder="Add a description..."
@@ -109,7 +171,8 @@ export default function GeneratedPostModal({ isOpen, onClose, post }: GeneratedP
                 Body
               </label>
               <textarea 
-                value={post.body ?? ''} 
+                value={body} 
+                onChange={(e) => setBody(e.target.value)}
                 className="w-full backdrop-blur-sm bg-white/80 border-2 border-pink-200 rounded-xl px-4 py-3 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all duration-200 hover:border-pink-300 resize-none" 
                 rows={10}
                 placeholder="Write your post content..."
@@ -126,7 +189,8 @@ export default function GeneratedPostModal({ isOpen, onClose, post }: GeneratedP
               </label>
               <input 
                 type="text" 
-                value={post.hashtags.join(' ')} 
+                value={hashtags} 
+                onChange={(e) => setHashtags(e.target.value)}
                 className="w-full backdrop-blur-sm bg-white/80 border-2 border-pink-200 rounded-xl px-4 py-3 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all duration-200 hover:border-pink-300"
                 placeholder="#example #hashtags"
               />
@@ -142,14 +206,15 @@ export default function GeneratedPostModal({ isOpen, onClose, post }: GeneratedP
               </label>
               <input 
                 type="text" 
-                value={post.imageUrl ?? ''} 
+                value={imageUrl} 
+                onChange={(e) => setImageUrl(e.target.value)}
                 className="w-full backdrop-blur-sm bg-white/80 border-2 border-pink-200 rounded-xl px-4 py-3 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all duration-200 hover:border-pink-300"
                 placeholder="https://example.com/image.jpg"
               />
               {post.imageUrl && (
                 <div className="mt-4 backdrop-blur-sm bg-white/60 rounded-xl p-4 border-2 border-pink-100">
                   <img 
-                    src={post.imageUrl ?? undefined} 
+                    src={imageUrl} 
                     alt="post preview" 
                     className="max-h-64 mx-auto object-contain rounded-lg shadow-lg" 
                   />
@@ -168,11 +233,11 @@ export default function GeneratedPostModal({ isOpen, onClose, post }: GeneratedP
             >
               Cancel
             </button>
-            <button className="px-8 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center gap-2">
+            <button type='button' onClick={handleUpdate} className="px-8 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              Save & Publish
+              Save
             </button>
           </div>
         </div>
