@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import { imageGenerator } from '../controllers/imageController';
-import { apiKeyValidator } from '../middleware/apiKeyValidator';
+import { generateImage } from '../controllers/imageController.js';
+import { authenticate } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
-router.use('/api/', apiKeyValidator);
-router.post('/api/image/generator', imageGenerator);
+router.use(authenticate);
+router.post('/generator', authenticate, generateImage);
 
 export default router;
+

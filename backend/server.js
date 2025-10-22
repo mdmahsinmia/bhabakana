@@ -8,6 +8,7 @@ import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import socialRoutes from './routes/socialRoutes.js';
 import contentRoutes from './routes/contentRoutes.js';
+import imageRoutes from './routes/imageRoutes.js';
 import { chat, streamChat } from './controllers/chatController.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import session from 'express-session';
@@ -60,6 +61,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/auth/connect', socialRoutes);
 app.use('/api/content', contentRoutes);
+app.use('/api/image', imageRoutes);
 // console.log(app)
 
 // Chat endpoints (non-streaming + streaming)

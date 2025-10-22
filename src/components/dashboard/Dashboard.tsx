@@ -295,7 +295,7 @@ export default function Dashboard() {
       };
 
       // Normalize every object in the array
-      const normalizedContent = generatedTextContent.map(
+      let normalizedContent = generatedTextContent.map(
         (item: GeneratedTextContentItem) => {
           const normalizedItem: Required<GeneratedTextContentItem> & {
             [key: string]: any;
@@ -308,7 +308,39 @@ export default function Dashboard() {
         }
       );
 
-      console.log("Normalized Content:", normalizedContent);
+      // console.log("Normalized Content:", normalizedContent);
+
+      if (includeImage) {
+        // If user selected "image", generate image prompts separately
+        let generatedImagePrompts: Array<{
+          prompt: string;
+        }> = [];
+        if (includeImage) {
+          generatedImagePrompts = generatedTextContent.map((item: any) => ({
+            prompt: `Generate an image based on: ${item.imagePrompt}. Generated image will be posted on ${item.platform}.`, // simple placeholder
+          }));
+        }
+
+        // console.log(generatedImagePrompts);
+
+        const resImage = await axios.post(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/image/generator`,
+          generatedImagePrompts,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("images", resImage.data);
+
+        // ✅ Assign the result to normalizedContent
+        normalizedContent = normalizedContent.map((obj, index) => ({
+          ...obj,
+          imageUrl: resImage?.data[index]?.image || null,
+        }));
+      }
 
       // create posts with normalizedContent array objects
       const resPost = await axios.post(
@@ -321,10 +353,9 @@ export default function Dashboard() {
         }
       );
 
-      console.log('post created', resPost.data)
+      console.log("post created", resPost.data);
 
-      
-      if (response.status === 200) {
+      if (resPost.status === 201) {
         setStep(1);
         setContentType(null);
         setCategory("");
@@ -337,31 +368,14 @@ export default function Dashboard() {
         });
       }
 
-      // If user selected "image", generate image prompts separately
-      let generatedImagePrompts: Array<{
-        platform: string;
-        imageUrl: string;
-      }> = [];
-      if (includeImage) {
-        generatedImagePrompts = generatedTextContent.map((item: any) => ({
-          platform: item.platform,
-          imageUrl: `Generate an image based on: ${topicText}`, // simple placeholder
-        }));
-      }
-
-      // Merge text + image prompts
-      const finalContent = generatedTextContent.map((item: any) => ({
-        ...item,
-        imageUrl:
-          includeImage &&
-          generatedImagePrompts.find(
-            (img: any) => img.platform === item.platform
-          )?.imageUrl,
-      }));
-
       // setGeneratedContent(finalContent);
     } catch (error) {
       console.error("Error generating content:", error);
+      setStep(1);
+      setContentType(null);
+      setCategory("");
+      setMediaType([]);
+      setInputTopic("");
       toast({
         title: "Error",
         description: "Failed to generate content.",
